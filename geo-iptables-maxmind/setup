@@ -1,0 +1,36 @@
+i improved upon the standard xt_geoip_dl script to make it more friendly for cron.
+
+
+this apt line is to install deps for debian jessie: 
+
+apt-get install linux-headers-`uname -r` libtext-csv-xs-perl xtables-addons-common iptables-dev
+
+then replace /usr/lib/xtables-addons/xt_geoip_dl with this:
+
+--snip--
+
+#!/bin/sh
+
+rm -f /root/geo/Geo*
+wget -P /root/geo \
+        http://geolite.maxmind.com/download/geoip/database/GeoIPv6.csv.gz \
+        http://geolite.maxmind.com/download/geoip/database/GeoIPCountryCSV.zip;
+gzip -d /root/geo/GeoIPv6.csv.gz;
+unzip /root/geo/GeoIPCountryCSV.zip;
+
+--snip--
+
+make a dir: 
+
+mkdir -p /usr/share/xt_geoip
+
+crontab two lines:
+
+@monthly /usr/lib/xtables-addons/xt_geoip_dl
+@monthly /usr/lib/xtables-addons/xt_geoip_build -D /usr/share/xt_geoip /root/geo/*.csv
+
+
+
+then you can do stuff like this: 
+
+iptables -A INPUT -p tcp -m geoip --src-cc CN -j DROP

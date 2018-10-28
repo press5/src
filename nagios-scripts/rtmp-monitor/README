@@ -1,0 +1,29 @@
+This is a quick, simple script I wrote to monitor the status of an nginx-rtmp-module server. 
+The module provides a status page, /stats for plain text and /stat for XML. We'll use the XML version.
+The only thing you need to edit in rtmpmon.pl is the path to your /stat page, where indicated.
+Once you've done that, accessing rtmpmon.pl from your server in a browser you'll
+see something like this: 
+
+stream1-publishing
+stream2-publishing
+stream3- 
+stream4-
+
+My example has four streams and only the first two are currently publishing. 
+
+On my webserver, my nrpe_local.cfg uses check_http to grab the status of each stream from rtmpmon.pl:
+
+command[check_rtmp_stream]=/usr/lib/nagios/plugins/check_http -H your.com -p 80 -u /rtmpmon.pl -r $ARG1$
+
+On my nagios server, I set up a service for each stream: 
+
+define service{
+  use                   generic-service
+  host_name             webserver
+  service_description   stream_1
+  check_command         check_nrpe!check_rtmp_stream!stream1-publishing
+}
+
+The nagios check_command argument from check_rtsp is always going to be the name of your stream, 
+followed by a dash, followed by the word 'publishing'.   
+

@@ -1,0 +1,18 @@
+vultr-bwmon - a set of scripts for Nagios to monitor bandwidth on Vultr VPSes
+
+vultr-getbw.pl - gets the bandwidth data from the api
+    cron this to run no less than hourly (vultr only updates bandwidth hourly);
+    write the output to a file somewhere nagios can read it to get the data
+    (like /tmp/vultr.bw) 
+
+nagios-vultr-bwmon.pl - the nagios script itself. 
+    arguments: [path to bw file] [server_label] <warn thresh> <crit thresh>
+    example: nagios-vultr-bwmon /tmp/vultr.bw fhqwhgads 75 80
+    defaults to 80 for warn_thresh and 90 for crit_thresh
+
+Known issues:
+  vultr-getbw.pl will throw a JSON error if you forgot to whitelist the IP
+  running the script at vultr's website
+
+  nagios-vultr-bwmon.pl does not round the bandwidth percentage, it just truncs
+  after two decimal places
